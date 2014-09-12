@@ -235,6 +235,11 @@ and `upperBound - 1`, inclusive.
 Otherwise, return a random `bigint` between 0 and the instance value - 1,
 inclusive.
 
+.isPerfectSquare()
+------------
+
+Return whether the bigint is a perfect square using [mpz_perfect_square_p](https://gmplib.org/manual/Perfect-Square-Algorithm.html).
+
 .probPrime()
 ------------
 
