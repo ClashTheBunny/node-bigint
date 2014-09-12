@@ -281,6 +281,11 @@ BigInt.prototype.invertm = function (mod) {
     }
 };
 
+BigInt.prototype.isPerfectSquare = function () {
+    var n = this.isperfectsquare();
+    return n > 0;
+};
+
 BigInt.prototype.probPrime = function (reps) {
     var n = this.probprime(reps || 10);
     return { 2 : true, 1 : 'maybe', 0 : false }[n];

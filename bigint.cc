@@ -92,6 +92,7 @@ class BigInt : ObjectWrap {
 		static Handle<Value> Upow(const Arguments& args);
 		static Handle<Value> Uupow(const Arguments& args);
 		static Handle<Value> Brand0(const Arguments& args);
+		static Handle<Value> isPerfectSquare(const Arguments& args);
 		static Handle<Value> Probprime(const Arguments& args);
 		static Handle<Value> Nextprime(const Arguments& args);
 		static Handle<Value> Bcompare(const Arguments& args);
@@ -146,6 +147,7 @@ void BigInt::Initialize(v8::Handle<v8::Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "upow", Upow);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "uupow", Uupow);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "brand0", Brand0);
+	NODE_SET_PROTOTYPE_METHOD(constructor_template, "isperfectsquare", isPerfectSquare);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "probprime", Probprime);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "nextprime", Nextprime);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "bcompare", Bcompare);
@@ -588,6 +590,15 @@ BigInt::Brand0(const Arguments& args)
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
+}
+
+Handle<Value>
+BigInt::isPerfectSquare(const Arguments& args)
+{
+	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
+	HandleScope scope;
+	
+	return scope.Close(Number::New(mpz_perfect_square_p(*bigint->bigint_)));
 }
 
 Handle<Value>
