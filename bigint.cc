@@ -106,6 +106,7 @@ class BigInt : ObjectWrap {
 		static Handle<Value> Broot(const Arguments& args);
 		static Handle<Value> BitLength(const Arguments& args);
 		static Handle<Value> Bgcd(const Arguments& args);
+		static Handle<Value> Bjacobi(const Arguments& args);
 };
 
 static gmp_randstate_t *		randstate	= NULL;
@@ -120,7 +121,7 @@ void BigInt::SetJSConditioner(Persistent<Function> constructor) {
 
 void BigInt::Initialize(v8::Handle<v8::Object> target) {
 	HandleScope scope;
-	
+
 	Local<FunctionTemplate> t = FunctionTemplate::New(New);
 	constructor_template = Persistent<FunctionTemplate>::New(t);
 
@@ -161,6 +162,7 @@ void BigInt::Initialize(v8::Handle<v8::Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "broot", Broot);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "bitLength", BitLength);
 	NODE_SET_PROTOTYPE_METHOD(constructor_template, "bgcd", Bgcd);
+	NODE_SET_PROTOTYPE_METHOD(constructor_template, "bjacobi", Bjacobi);
 
 	target->Set(String::NewSymbol("BigInt"), constructor_template->GetFunction());
 }
@@ -305,7 +307,7 @@ BigInt::Bsub(const Arguments& args)
 	mpz_sub(*res, *bigint->bigint_, *bi->bigint_);
 
 	WRAP_RESULT(res, result);
-	
+
 	return scope.Close(result);
 }
 
@@ -319,7 +321,7 @@ BigInt::Bmul(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_mul(*res, *bigint->bigint_, *bi->bigint_);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -335,7 +337,7 @@ BigInt::Bdiv(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_div(*res, *bigint->bigint_, *bi->bigint_);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -351,7 +353,7 @@ BigInt::Uadd(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_add_ui(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -367,7 +369,7 @@ BigInt::Usub(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_sub_ui(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -383,7 +385,7 @@ BigInt::Umul(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_mul_ui(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -399,7 +401,7 @@ BigInt::Udiv(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_div_ui(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -415,7 +417,7 @@ BigInt::Umul_2exp(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_mul_2exp(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -431,7 +433,7 @@ BigInt::Udiv_2exp(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_div_2exp(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -446,7 +448,7 @@ BigInt::Babs(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_abs(*res, *bigint->bigint_);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -461,7 +463,7 @@ BigInt::Bneg(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_neg(*res, *bigint->bigint_);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -477,7 +479,7 @@ BigInt::Bmod(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_mod(*res, *bigint->bigint_, *bi->bigint_);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -493,7 +495,7 @@ BigInt::Umod(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_mod_ui(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -527,10 +529,10 @@ BigInt::Upowm(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_powm_ui(*res, *bigint->bigint_, x, *bi->bigint_);
-	
+
 	WRAP_RESULT(res, result);
-	
-	return scope.Close(result);	
+
+	return scope.Close(result);
 }
 
 Handle<Value>
@@ -543,13 +545,13 @@ BigInt::Upow(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_pow_ui(*res, *bigint->bigint_, x);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
 }
 
-/* 
+/*
  * This makes no sense?  It doesn't act on the object but is a
  * prototype method.
  */
@@ -563,7 +565,7 @@ BigInt::Uupow(const Arguments& args)
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
 	mpz_ui_pow_ui(*res, x, y);
-	
+
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
@@ -577,14 +579,14 @@ BigInt::Brand0(const Arguments& args)
 
 	mpz_t *res = (mpz_t *) malloc(sizeof(mpz_t));
 	mpz_init(*res);
-	
+
 	if(randstate == NULL) {
 		randstate = (gmp_randstate_t *) malloc(sizeof(gmp_randstate_t));
 		gmp_randinit_default(*randstate);
 		unsigned long seed = rand() + (time(NULL) * 1000) + clock();
         	gmp_randseed_ui(*randstate, seed);
 	}
-	
+
 	mpz_urandomm(*res, *randstate, *bigint->bigint_);
 
 	WRAP_RESULT(res, result);
@@ -597,7 +599,7 @@ BigInt::isPerfectSquare(const Arguments& args)
 {
 	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
 	HandleScope scope;
-	
+
 	return scope.Close(Number::New(mpz_perfect_square_p(*bigint->bigint_)));
 }
 
@@ -606,7 +608,7 @@ BigInt::Probprime(const Arguments& args)
 {
 	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
 	HandleScope scope;
-	
+
 	REQ_UINT32_ARG(0, reps);
 
 	return scope.Close(Number::New(mpz_probab_prime_p(*bigint->bigint_, reps)));
@@ -632,7 +634,7 @@ BigInt::Bcompare(const Arguments& args)
 {
 	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
 	HandleScope scope;
-	
+
 	BigInt *bi = ObjectWrap::Unwrap<BigInt>(args[0]->ToObject());
 
 	return scope.Close(Number::New(mpz_cmp(*bigint->bigint_, *bi->bigint_)));
@@ -643,9 +645,9 @@ BigInt::Scompare(const Arguments& args)
 {
 	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
 	HandleScope scope;
-	
+
 	REQ_INT64_ARG(0, x);
-	
+
 	return scope.Close(Number::New(mpz_cmp_si(*bigint->bigint_, x)));
 }
 
@@ -654,7 +656,7 @@ BigInt::Ucompare(const Arguments& args)
 {
 	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
 	HandleScope scope;
-	
+
 	REQ_UINT64_ARG(0, x);
 
 	return scope.Close(Number::New(mpz_cmp_ui(*bigint->bigint_, x)));
@@ -782,6 +784,17 @@ BigInt::Bgcd(const Arguments& args)
 	WRAP_RESULT(res, result);
 
 	return scope.Close(result);
+}
+
+Handle<Value>
+BigInt::Bjacobi(const Arguments& args)
+{
+	BigInt *bigint = ObjectWrap::Unwrap<BigInt>(args.This());
+	HandleScope scope;
+
+	BigInt *bi = ObjectWrap::Unwrap<BigInt>(args[0]->ToObject());
+
+	return scope.Close(Number::New(mpz_jacobi(*bigint->bigint_, *bi->bigint_)));
 }
 
 static Handle<Value>

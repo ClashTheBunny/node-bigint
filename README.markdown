@@ -21,7 +21,7 @@ simple.js
 ---------
 
     var bigint = require('bigint');
-    
+
     var b = bigint('782910138827292261791972728324982')
         .sub('182373273283402171237474774728373')
         .div(8)
@@ -283,6 +283,12 @@ Return a new `bigint` of the value integer divided by
 -------
 
 Return the greatest common divisor of the current bigint with `n` as a new
+bigint.
+
+.jacobi(n)
+-------
+
+Return the Jacoby symbol of the current bigint with `n` as a new
 bigint.
 
 .bitLength()
